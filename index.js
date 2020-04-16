@@ -13,7 +13,7 @@ const growthMetric = "case_gf"; // or
 
 const speed = 500;
 const transitionDuration = 0;
-const reverse = true;
+// const reverse = true;
 
 var mapColor = "#cecece";
 var backgroundColor = "#ffffff";
