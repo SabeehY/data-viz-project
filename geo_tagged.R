@@ -3,46 +3,67 @@ library(dplyr)
 library(lubridate)
 
 data <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
+deathData <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
 
-df <- data %>%
-  gather("date", "count",  names(data)[grepl("X", names(data))]) %>%
-  filter(iso2 == "US", Lat != "0", Long_ != "0") %>% #Only include US and with lat long values
-  #select(c(UID, FIPS, Admin2, Province_State ,Lat, Long_, date, count)) %>%
-  select(UID, Lat, Long_, date, count) %>% # Select required
-  rename('lat' = Lat, 'lon' = Long_) %>% # Rename for ease
-  mutate(date = str_replace_all(date, "X", "")) %>% # Fix date
-  mutate(date = as.Date(date, format = "%m.%d.%y")) %>% # Parse date
-  arrange(date) # sort by date
+reformatData <- function(data) {
+  return(
+    data %>%
+      gather("date", "count",  names(data)[grepl("X", names(data))]) %>%
+      filter(iso2 == "US", Lat != "0", Long_ != "0") %>% #Only include US and with lat long values
+      #select(c(UID, FIPS, Admin2, Province_State ,Lat, Long_, date, count)) %>%
+      select(UID, Lat, Long_, date, count) %>% # Select required
+      rename('lat' = Lat, 'lon' = Long_) %>% # Rename for ease
+      mutate(date = str_replace_all(date, "X", "")) %>% # Fix date
+      mutate(date = as.Date(date, format = "%m.%d.%y")) %>% # Parse date
+      arrange(date) # sort by date
+  )
+}
 
-## Group by week
-df <- group_by(df, UID, date=cut(date, "1 day")) %>%
-  summarise(count = sum(count), lat=first(lat), lon=first(lon))  %>%
-  arrange(UID, date)
+df <- reformatData(data)
+death <- reformatData(deathData) %>% select(UID, count, date)
+
+df <- df %>% left_join(death, by=c("UID", "date")) %>%
+  rename('case' = `count.x`, "death" = `count.y`)
+
+## Group by week/day etc
+# df <- group_by(df, UID, date=cut(date, "1 week")) %>%
+#   summarise(case = sum(case), death=sum(death), lat=first(lat), lon=first(lon))  %>%
+#   arrange(UID, date)
 
 # add cumsum
-df <- mutate(group_by(df,UID), cumsum=cumsum(count))
+df <- mutate(group_by(df,UID), case_cum=cumsum(case), death_cum=cumsum(death))
 
-### Areas with total greater than 2000
+### Areas with case_cumsum > 1000
 filtered <- df %>%
   group_by(UID) %>%
-  summarize(cumsum = max(cumsum)) %>%
-  filter(cumsum > 1000)
+  summarize(max = max(case_cum)) %>%
+  filter(max > 500)
 
 df <- filter(df, UID %in% filtered$UID)
 
 # Add growth factor
 df <- df %>%
       arrange(UID, date) %>%
-      mutate(gf=count/lag(count))
+      mutate(case_gf=case/lag(case), death_gf=death/lag(death))
 
-df$gf[is.na(df$gf)] <- 0 # Remove zero day values, which causes Inf
-df <- df[!is.infinite(df$gf),] # Remove first day values, which causes Inf
-df$gf <- format(round(df$gf, 3),nsmall=3)
+formatGrowthFactors <- function(df, colName) {
+  COL <- pull(df, colName)
+  COL <- COL %>% replace_na(0) %>% round(3) # Change N/A to 0, this is when it is 0 after 0
+  COL[is.infinite(COL)] <- 1 # Change infinite to 1, this when it goes up from 0 so percentge is undefined
+  df[[colName]] <- COL
+  return(df)
+}
+
+df <- formatGrowthFactors(df, "case_gf")
+df <- formatGrowthFactors(df, "death_gf")
 
 ### After March
-#df <- filter(df, date > "2020-03-01")
+df <- filter(df, date > "2020-03-01")
 
 df <- arrange(df, date)
+totals <- group_by(df, date) %>% summarize(case=sum(case), death=sum(death), case_cum=cumsum(case), death_cum=cumsum(death))
+
 write_csv(df, 'geo_cleaned.csv')
+write_csv(totals, 'totals.csv')
 
 #View(df)
