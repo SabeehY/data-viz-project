@@ -26,7 +26,7 @@ df <- mutate(group_by(df,UID), cumsum=cumsum(count))
 filtered <- df %>%
   group_by(UID) %>%
   summarize(cumsum = max(cumsum)) %>%
-  filter(cumsum > 500)
+  filter(cumsum > 1000)
 
 df <- filter(df, UID %in% filtered$UID)
 

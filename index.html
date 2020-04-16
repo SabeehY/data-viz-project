@@ -5,7 +5,7 @@
           name="viewport">
     <meta content="ie=edge" http-equiv="X-UA-Compatible">
     <title>Document</title>
-    <script src="https://d3js.org/d3.v5.js"></script>
+    <script src="https://d3js.org/d3.v5.min.js"></script>
     <script src="https://d3js.org/d3-dsv.v1.min.js"></script>
     <script src="https://d3js.org/d3-fetch.v1.min.js"></script>
     <script src="https://d3js.org/d3-selection.v1.min.js"></script>
@@ -13,9 +13,26 @@
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
 </head>
 <body>
-<button id="replay">replay</button>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6" id="bubble">
+            <button class="btn btn-primary">Replay</button>
+            <div>
+                <svg></svg>
+            </div>
+        </div>
+        <div class="col-md-6" id="growth-factor">
+            <button class="btn btn-primary">Replay</button>
+            <div>
+                <svg></svg>
+            </div>
+        </div>
+    </div>
+</div>
 <script src="index.js"></script>
 </body>
 </html>
