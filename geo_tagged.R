@@ -22,7 +22,7 @@ reformatData <- function(data) {
 df <- reformatData(data)
 death <- reformatData(deathData)
 lookup <- lookup %>%
-  filter(!is.na(FIPS), code3 == 840) %>%
+  filter(!is.na(FIPS), code3 == 840) %>% # select only USA
   select(UID, Lat, Long_, FIPS) %>% # Select any attributes needed from lookup
   rename('lat' = Lat, 'lon' = Long_) # Rename for ease
 
@@ -66,8 +66,8 @@ df <- formatGrowthFactors(df, "death_gf")
 df <- arrange(df, date)
 totals <- group_by(df, date) %>% summarize(case=sum(case), death=sum(death), case_cum=cumsum(case), death_cum=cumsum(death))
 
-write_csv(lookup, 'lookup.csv')
-write_csv(df, 'geo_cleaned.csv')
-write_csv(totals, 'totals.csv')
+write_csv(lookup, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/lookup.csv')
+write_csv(df, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/geo_cleaned.csv')
+write_csv(totals, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/totals.csv')
 
 #View(df)

@@ -1,5 +1,5 @@
+// Code taken from
 // https://observablehq.com/@d3/color-legend - Mike Bostock
-// https://www.d3-graph-gallery.com/graph/bubble_legend.html
 
 function ramp(color, n = 256) {
   const canvas = document.createElement('canvas');
@@ -18,20 +18,21 @@ function entity(character) {
 }
 
 function legend({
-                  color,
-                  title,
-                  tickSize = 6,
-                  width = 320,
-                  height = 44 + tickSize,
-                  marginTop = 18,
-                  marginRight = 0,
-                  marginBottom = 16 + tickSize,
-                  marginLeft = 0,
-                  ticks = width / 64,
-                  tickFormat,
-                  tickValues,
-                  radius // <-- if bubble chart
-                } = {}) {
+  color,
+  title,
+  tickSize = 6,
+  width = 320,
+  height = 44 + tickSize,
+  marginTop = 18,
+  marginRight = 0,
+  marginBottom = 16 + tickSize,
+  marginLeft = 0,
+  ticks = width / 64,
+  tickFormat,
+  tickValues,
+  radius, // <-- if bubble chart
+  radiusStroke = 'black'
+} = {}) {
   const svg = d3.create("svg")
     .attr("width", width)
     .attr("height", height)
@@ -42,6 +43,8 @@ function legend({
   let tickAdjust = g => g.selectAll(".tick line").attr("y1", marginTop + marginBottom - height);
   let x;
   
+  // Code taken from
+  // https://www.d3-graph-gallery.com/graph/bubble_legend.html
   if (radius) {
     // Add legend: circles
     var xCircle = 0
@@ -61,8 +64,9 @@ function legend({
       .attr("r", function (d) {
         return radius(d)
       })
-      .style("fill", "none")
-      .attr("stroke", "black")
+      .attr("fill-opacity", 0.1)
+      .style("fill", radiusStroke)
+      .attr("stroke", radiusStroke)
     
     // Add legend: segments
     group
@@ -101,7 +105,7 @@ function legend({
   
     // console.log()
     group.append("text")
-      .attr("x", -10)
+      .attr("x", -20)
       .attr("y", (yCircle - radius(Math.max(...tickValues)) * 2 - 10))
       .attr("fill", "black")
       .attr("text-anchor", "start")

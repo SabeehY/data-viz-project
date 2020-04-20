@@ -7,12 +7,12 @@ const titles = {
   "case_gf": "Growth factor of new cases"
 }
 
-const bubbleMetric = "case"; // or deaths_cum
-const growthMetric = "case_gf"; // or
-const peakMetric = "case_cum"; // or deaths_cum
+let bubbleMetric = "case"; // or deaths_cum
+let growthMetric = "case_gf"; // or
+let peakMetric = "case_cum"; // or deaths_cum
 
 var chartSelectorParent = document.getElementById("chartTypeSelector")
-Array.from([bubbleMetric, growthMetric]).forEach(metric => {
+function addMetricInput(metric) {
   const input = document.createElement('input');
   input.type = "radio"
   input.name = "chartType"
@@ -25,7 +25,11 @@ Array.from([bubbleMetric, growthMetric]).forEach(metric => {
   const label = document.createTextNode(titles[metric]);
   chartSelectorParent.appendChild(label);
   chartSelectorParent.appendChild(document.createElement('br'));
-});
+}
+
+Array.from([bubbleMetric, growthMetric]).forEach(addMetricInput);
+chartSelectorParent.appendChild(document.createElement('hr'));
+Array.from(["death", "death_gf"]).forEach(addMetricInput);
 
 const speed = 500;
 const transitionDuration = 100;
@@ -53,9 +57,6 @@ const peakColor = d => d3.interpolateOrRd(peakColorScale(d[peakMetric]));
 const lollipopScale = d3.scalePow().exponent(0.5);
 // const dotColor = d3.scaleLinear();
 const dotColor = d3.scaleDiverging([0, 1, 4], t => d3.interpolateSpectral(1 - t))
-
-// let projectX = d => projection(lookupMap.get(+d.UID))[0];
-// let projectY = d => projection(lookupMap.get(+d.UID))[1];
 
 const projectY = d => {
   const projected = projection(lookupMap.get(+d.UID));
@@ -279,16 +280,6 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
   if (!dataset) throw "No dataset given";
   
   
-  bubbleScale.domain(d3.extent(dataset.map(d => d[bubbleMetric]))).range([0, 100]);
-  peakColorScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 1]);
-  peakScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 100]);
-  peak.size(d => peakScale(d[peakMetric]));
-  
-  const gfExtent = d3.extent(dataset.map(d => d[growthMetric]));
-  lollipopScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 100])
-  // dotColor.domain([0, 1, gfExtent[1]]).range(["blue", "red", "yellow"]).interpolate(d3.interpolateCubehelix)
-  
-  
   grouped = dataset.reduce((next, curr) => {
     if (next[curr.date]) {
       next[curr.date].set(+curr.UID, curr);
@@ -333,6 +324,15 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     svg.attr("width", function () {
       return this.parentNode.clientWidth
     }).attr("height", 400).style("background", backgroundColor);
+    
+    bubbleScale.domain(d3.extent(dataset.map(d => d[bubbleMetric]))).range([0, 100]);
+    peakColorScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 1]);
+    peakScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 100]);
+    peak.size(d => peakScale(d[peakMetric]));
+    
+    const gfExtent = d3.extent(dataset.map(d => d[growthMetric]));
+    lollipopScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 100]);
+    // dotColor.domain([0, 1, gfExtent[1]]).range(["blue", "red", "yellow"]).interpolate(d3.interpolateCubehelix)
   
     baseMap(svg);
     
@@ -361,9 +361,10 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
         .attr("class", "legend")
         .append(() => legend({
           radius: bubbleScale,
+          radiusStroke: 'red',
           title: titles[bubbleMetric],
           tickFormat: ",d",
-          tickValues: [100, 5000, 10000]
+          tickValues: bubbleMetric === 'case' ? [100, 5000, 10000] : [10, 100, 1000] // death
         }));
     } else {
       svg.select('.legend').remove();
@@ -422,6 +423,18 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     timer.stop();
     i = 0;
     dateRange.value = 0;
+    
+    switch (val) {
+      case "case":
+      case "death":
+        bubbleMetric = val;
+        break;
+      case "case_gf":
+      case "death_gf":
+        growthMetric = val;
+        break;
+    }
+    
     updateMeta();
     updateMap(dates[0]);
   }
