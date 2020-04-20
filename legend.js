@@ -98,7 +98,16 @@ function legend({
       })
       .style("font-size", 10)
       .attr('alignment-baseline', 'middle')
-    
+  
+    // console.log()
+    group.append("text")
+      .attr("x", -10)
+      .attr("y", (yCircle - radius(Math.max(...tickValues)) * 2 - 10))
+      .attr("fill", "black")
+      .attr("text-anchor", "start")
+      .attr("font-weight", "bold")
+      .text(title)
+  
     return group.node();
   }
   

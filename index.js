@@ -1,15 +1,15 @@
 const titles = {
-  "death": "Daily Deaths",
-  "death_cum": "Cumulative deaths",
+  "death": "Daily deaths",
+  "death_cum": "Cumulative total deaths",
   "death_gf": "Growth factor of new deaths",
-  "case": "Daily new cases",
-  "case_cum": "Cumulative positive cases",
+  "case": "Daily cases",
+  "case_cum": "Cumulative total cases",
   "case_gf": "Growth factor of new cases"
 }
 
-const bubbleMetric = "death_cum"; // or deaths_cum
-const peakMetric = "case_cum"; // or deaths_cum
+const bubbleMetric = "case"; // or deaths_cum
 const growthMetric = "case_gf"; // or
+const peakMetric = "case_cum"; // or deaths_cum
 
 var chartSelectorParent = document.getElementById("chartTypeSelector")
 Array.from([bubbleMetric, growthMetric]).forEach(metric => {
@@ -43,14 +43,14 @@ let usTopoJSON;
 const bubbleScale = d3.scaleSqrt();
 const peakColorScale = d3.scaleSqrt();
 const bubbleColorScale = d3.scaleSqrt();
-const peakScale = d3.scalePow().exponent(0.7);
+const peakScale = d3.scaleLinear();
 const timeScale = d3.scaleTime();
 
 const bubbleRadius = d => bubbleScale(d[bubbleMetric]);
 const bubbleColor = d => d3.interpolateBuPu(bubbleColorScale(d[bubbleMetric]));
 const peakColor = d => d3.interpolateOrRd(peakColorScale(d[peakMetric]));
 
-const growthBarScale = d3.scaleLinear(1);
+const lollipopScale = d3.scalePow().exponent(0.5);
 // const dotColor = d3.scaleLinear();
 const dotColor = d3.scaleDiverging([0, 1, 4], t => d3.interpolateSpectral(1 - t))
 
@@ -183,8 +183,9 @@ function showBubbles(svg, data) {
 
 function showPeaks(svg, data) {
   if (!svg || !data) throw "svg and data must be given"
+  const non_zero = Array.from(data.values()).filter(d => +d[peakMetric] > 0);
   svg.selectAll(".peaks")
-    .data(data, key)
+    .data(non_zero, key)
     .join(
       enter => enter.append("path")
         .attr('opacity', 0.7)
@@ -199,52 +200,34 @@ function showPeaks(svg, data) {
     .transition()
     .duration(transitionDuration)
     .attr("d", peak)
-    .style("stroke", peakColor)
-    .style("fill", peakColor)
-    .style("opacity", 0.8)
+    .style("stroke", 'red')
+    .style("fill", 'red')
+    .style("opacity", 0.6)
 }
 
-function showGrowthFactor(svg, data) {
+function showLollipop(svg, data) {
   const bar = svg.selectAll(".growth").data(data, key);
   const dot = svg.selectAll(".dot").data(data, key);
+  const metric = peakMetric;
   
-  bar
-    .join(
-      enter => enter.append("rect")
-        .attr("class", "growth")
-        .attr("width", 0.5)
-        .attr("fill", lollipopLineColor)
-        .attr("height", d => growthBarScale(d[growthMetric])), // start from 0
-      update => update,
-      exit => exit.remove()
-    )
-    .transition()
-    .duration(transitionDuration)
+  bar.join("rect")
+    .attr("class", "growth")
+    .attr("width", 0.5)
+    .attr("fill", lollipopLineColor)
+    .attr("height", d => lollipopScale(d[metric]))
     .attr("transform", (d, i) => {
-      return "translate(" + projectX(d) + "," + Number(projectY(d) - growthBarScale(d[growthMetric])) + ")";
-    })
-    .attr("height", d => growthBarScale(d[growthMetric])),
-    
-    dot.join(
-      enter => enter.append("circle")
-        .attr("class", "dot")
-        .attr("r", 2)
-        .attr("opacity", 0.5)
-        .attr("fill", d => dotColor(d[growthMetric]))
-        .attr("transform", (d, i) => {
-          return "translate(" + projectX(d) + "," + Number(projectY(d) - growthBarScale(d[growthMetric])) + ")"
-        }),
-      update => update
-        .transition()
-        .duration(transitionDuration)
-        .attr("fill", d => dotColor(d[growthMetric]))
-        // .attr("opacity", d => d[growthMetric > 1 ? 1 : 0.5)
-        .attr("opacity", 1)
-        .attr("transform", (d, i) => {
-          return "translate(" + projectX(d) + "," + Number(projectY(d) - growthBarScale(d[growthMetric])) + ")"
-        }),
-      exit => exit
-    )
+      return "translate(" + projectX(d) + "," + Number(projectY(d) - lollipopScale(d[metric])) + ")";
+    });
+  
+  dot.join("circle")
+    .attr("class", "dot")
+    .attr("r", 2)
+    // .attr("fill", d => dotColor(d[metric]))
+    .attr("fill", "red")
+    .attr("opacity", 0.6)
+    .attr("transform", (d, i) => {
+      return "translate(" + projectX(d) + "," + Number(projectY(d) - lollipopScale(d[metric])) + ")"
+    });
 }
 
 function createTimer(funcs, svg, dates) {
@@ -302,7 +285,7 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
   peak.size(d => peakScale(d[peakMetric]));
   
   const gfExtent = d3.extent(dataset.map(d => d[growthMetric]));
-  growthBarScale.domain(gfExtent).range([0, 400])
+  lollipopScale.domain(d3.extent(dataset.map(d => d[peakMetric]))).range([0, 100])
   // dotColor.domain([0, 1, gfExtent[1]]).range(["blue", "red", "yellow"]).interpolate(d3.interpolateCubehelix)
   
   
@@ -327,27 +310,6 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
       .style("color", textColor);
   }
   
-  // var bubbleContainer = d3.select('#bubble');
-  // addTitle(bubbleContainer, bubbleMetric);
-  // var bubbleSvg = createSvg(bubbleContainer);
-  //
-  // var growthFactorContainer = d3.select('#growth-factor');
-  // addTitle(growthFactorContainer, growthMetric);
-  // var growthFactorSvg = createSvg(growthFactorContainer);
-  //
-  // var peakContainer = d3.select('#peak');
-  // addTitle(peakContainer, peakMetric);
-  // var peakSvg = createSvg(peakContainer);
-  //
-  // var chloroContainer = d3.select("#chloropleth");
-  // addTitle(chloroContainer, growthMetric);
-  // var chloroSvg = createSvg(chloroContainer);
-  
-  // var bubbleTimer = createTimer(showBubbles, bubbleSvg, dates);
-  // var growthFactorTimer = createTimer(showGrowthFactor, growthFactorSvg, dates);
-  // var peakTimer = createTimer(showPeaks, peakSvg, dates);
-  // var choloroTimer = createTimer(showChloro, chloroSvg, dates);
-  
   const dateRange = document.getElementById("date");
   var [chartType, chartTypeElement] = chartSelector();
   
@@ -361,21 +323,6 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
   var height = svg.node().clientHeight;
   projection.scale(width).translate([width / 2, height / 2]);
   
-  baseMap(svg);
-  if (chartType === "growth_factor") {
-    svg.append("g")
-      .attr("transform", "translate(200,45)")
-      .attr("class", "legend")
-      .append(() => legend({
-        color: dotColor,
-        title: "Growth Factor",
-        width: 150,
-        ticks: 2,
-        tickFormat: "",
-        tickValues: [0, 1, 4],
-      }));
-  }
-  
   // start animation
   function updateMeta() {
     // svg.selectAll("*").remove();
@@ -386,6 +333,7 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     svg.attr("width", function () {
       return this.parentNode.clientWidth
     }).attr("height", 400).style("background", backgroundColor);
+  
     baseMap(svg);
     
     
@@ -408,12 +356,12 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     } else if (chartType === bubbleMetric) {
       svg.append("g")
         .attr("transform", function () {
-          return "translate(" + (this.parentNode.clientWidth - 150) + "," + (this.parentNode.clientHeight - 80) + ")"
+          return "translate(" + (this.parentNode.clientWidth - 130) + "," + (this.parentNode.clientHeight - 60) + ")"
         })
         .attr("class", "legend")
         .append(() => legend({
           radius: bubbleScale,
-          title: "Growth Factor",
+          title: titles[bubbleMetric],
           tickFormat: ",d",
           tickValues: [100, 5000, 10000]
         }));
@@ -432,6 +380,9 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
       showBubbles(svg, data);
     } else if (chartType === growthMetric) {
       showChloro(svg, data);
+    } else if (chartType === peakMetric) {
+      // showPeaks(svg, data);
+      showLollipop(svg, Array.from(data.values()).filter(d => d[peakMetric] > 0));
     }
   }
   
