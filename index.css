@@ -1,0 +1,30 @@
+/*https://bl.ocks.org/mbostock/5925375*/
+.state-borders {
+    fill: none;
+    stroke: #b7b7b7;
+    stroke-linejoin: round;
+    stroke-linecap: round;
+}
+
+#chartTypeSelector > input[type=radio] {
+    margin-right: 10px;
+}
+
+#chart > svg {
+    overflow: visible;
+}
+
+.action-bar {
+    display: flex;
+    justify-content: center;
+}
+
+.action-bar > input[type=range] {
+    cursor: pointer;
+}
+
+.date {
+    font-size: 30px;
+    font-weight: bold;
+    fill: rgba(0, 0, 0, 0.5);
+}

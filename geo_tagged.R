@@ -4,6 +4,7 @@ library(lubridate)
 
 data <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
 deathData <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
+lookup <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv")
 
 reformatData <- function(data) {
   return(
@@ -11,8 +12,7 @@ reformatData <- function(data) {
       gather("date", "count",  names(data)[grepl("X", names(data))]) %>%
       filter(iso2 == "US", Lat != "0", Long_ != "0") %>% #Only include US and with lat long values
       #select(c(UID, FIPS, Admin2, Province_State ,Lat, Long_, date, count)) %>%
-      select(UID, Lat, Long_, date, count) %>% # Select required
-      rename('lat' = Lat, 'lon' = Long_) %>% # Rename for ease
+      select(UID, date, count) %>% # Select required
       mutate(date = str_replace_all(date, "X", "")) %>% # Fix date
       mutate(date = as.Date(date, format = "%m.%d.%y")) %>% # Parse date
       arrange(date) # sort by date
@@ -20,7 +20,11 @@ reformatData <- function(data) {
 }
 
 df <- reformatData(data)
-death <- reformatData(deathData) %>% select(UID, count, date)
+death <- reformatData(deathData)
+lookup <- lookup %>%
+  filter(!is.na(FIPS), code3 == 840) %>%
+  select(UID, Lat, Long_, FIPS) %>% # Select any attributes needed from lookup
+  rename('lat' = Lat, 'lon' = Long_) # Rename for ease
 
 df <- df %>% left_join(death, by=c("UID", "date")) %>%
   rename('case' = `count.x`, "death" = `count.y`)
@@ -34,12 +38,11 @@ df <- df %>% left_join(death, by=c("UID", "date")) %>%
 df <- mutate(group_by(df,UID), case_cum=cumsum(case), death_cum=cumsum(death))
 
 ### Areas with case_cumsum > 1000
-filtered <- df %>%
-  group_by(UID) %>%
-  summarize(max = max(case_cum)) %>%
-  filter(max > 500)
-
-df <- filter(df, UID %in% filtered$UID)
+# filtered <- df %>%
+#   group_by(UID) %>%
+#   summarize(max = max(case_cum)) %>%
+#   filter(max > 500)
+#df <- filter(df, UID %in% filtered$UID)
 
 # Add growth factor
 df <- df %>%
@@ -58,11 +61,12 @@ df <- formatGrowthFactors(df, "case_gf")
 df <- formatGrowthFactors(df, "death_gf")
 
 ### After March
-df <- filter(df, date > "2020-03-01")
+#df <- filter(df, date > "2020-03-01")
 
 df <- arrange(df, date)
 totals <- group_by(df, date) %>% summarize(case=sum(case), death=sum(death), case_cum=cumsum(case), death_cum=cumsum(death))
 
+write_csv(lookup, 'lookup.csv')
 write_csv(df, 'geo_cleaned.csv')
 write_csv(totals, 'totals.csv')
 
