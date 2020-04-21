@@ -1,3 +1,5 @@
+/* SABEEH YUNUS - DATA VISUALIZATION PROJECT */
+
 const titles = {
   "death": "Daily deaths",
   "death_cum": "Cumulative total deaths",
@@ -31,7 +33,7 @@ Array.from([bubbleMetric, growthMetric]).forEach(addMetricInput);
 chartSelectorParent.appendChild(document.createElement('hr'));
 Array.from(["death", "death_gf"]).forEach(addMetricInput);
 
-const speed = 500;
+const speed = 250;
 const transitionDuration = 100;
 // const reverse = true;
 
@@ -139,16 +141,13 @@ function showDate(svg, date) {
     .join("text")
     .attr("class", "date")
     // .text(d => d)
-    .text(d => {
-      return `${months[d.getMonth()]}, ${d.getDate()}`
-    })
+    .text(d => `${months[d.getMonth()]}, ${d.getDate()}`)
     .attr("x", function () {
-      return (this.parentNode.clientWidth - 40)
+      return (this.parentNode.clientWidth - 150)
     })
     .attr("y", function () {
       return (this.parentNode.clientHeight - 20)
     })
-    .attr("text-anchor", "end")
 }
 
 function showChloro(svg, data) {
@@ -177,9 +176,6 @@ function showBubbles(svg, data) {
     .style("fill-opacity", 0.3)
     .style("fill", bubbleColor)
     .style("fill", "red")
-  // .transition()
-  // .duration(transitionDuration)
-  // .attr("r", bubbleRadius)
 }
 
 function showPeaks(svg, data) {
@@ -273,11 +269,12 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
       return dataset
     });
 }).then(dataset => {
+  d3.select(".loader").remove();
+  if (!dataset) throw "No dataset given";
   // dataset = dataset.slice(res.length * 0.6) // subset for testing
   if (typeof reverse !== 'undefined' && reverse) {
     dataset = dataset.reverse();
   }
-  if (!dataset) throw "No dataset given";
   
   
   grouped = dataset.reduce((next, curr) => {
@@ -400,7 +397,7 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
   }
   
   updateMeta();
-  var timer = d3.interval(timerCallback, speed);
+  var timer;
   
   const date_min = new Date(dates[0])
   const date_max = new Date(dates[dates.length - 1])
@@ -411,16 +408,25 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
   dateRange.max = timeScale(date_max);
   dateRange.value = timeScale(date_min);
   
+  // timeAxis = d3.axisBottom(d3.scaleTime([date_min, date_max], [0, 400]));
+  // d3.select(dateRange.parentNode)
+  //   .datum([date_min, date_max])
+  //   .append("svg")
+  //   .append("g")
+  //   .attr("class", "date-scale")
+  //   .call(timeAxis);
+  
   const debounced = debounce(updateMap, 500);
   dateRange.addEventListener("input", function (event) {
-    timer.stop();
+    if (timer) timer.stop();
     const date = timeScale.invert(event.target.value);
     const dateKey = date.toISOString().split("T")[0];
     debounced(dateKey);
   });
   
+  
   window.onGraphChange = function (val) {
-    timer.stop();
+    if (timer) timer.stop();
     i = 0;
     dateRange.value = 0;
     

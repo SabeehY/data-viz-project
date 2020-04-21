@@ -12,10 +12,10 @@
     <script src="https://d3js.org/d3-transition.v1.min.js"></script>
     <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+    <script src="https://d3js.org/d3-axis.v1.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
-    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
-    <link href="index.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet"><link href="index.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 </head>
 <body>
 <div class="container">
@@ -23,21 +23,26 @@
         <div class="col-md-3">
             <h5>Select a metric</h5>
             <div for="chartType" id="chartTypeSelector">
-                <!--                <input type="radio" name="chartType" value="bubble" onchange="onGraphChange(value)" checked> Bubble-->
-                <!--                <br>-->
-                <!--                <input type="radio" name="chartType" value="growth_factor" onchange="onGraphChange(value)"> Growth Factor-->
             </div>
         </div>
         <div class="col-md-9">
-            <div id="chart">
+            <div class="loader">
+                <div>Loading...</div>
             </div>
+            <div id="chart"></div>
             <div class="btn-toolbar mt-5 action-bar">
                 <div class="btn-group mr-4">
-                    <button class="btn btn-sm btn-light" id="restart" onclick="onRestartClick()" type="button">&#8634;
+                    <button class="btn btn-sm btn-light" id="restart" onclick="onRestartClick()" type="button">
+                        <i class="fa fa-undo"></i>
+<!--                        &#8634;-->
                     </button>
-                    <button class="btn btn-sm btn-light" id="stop" onclick="onStopClick()" type="button">&#9208;
+                    <button class="btn btn-sm btn-light" id="stop" onclick="onStopClick()" type="button">
+                        <i class="fa fa-pause"></i>
+<!--                        &#9208;-->
                     </button>
-                    <button class="btn btn-sm btn-light" id="start" onclick="onStartClick()" type="button">&#9654;
+                    <button class="btn btn-sm btn-light" id="start" onclick="onStartClick()" type="button">
+                        <i class="fa fa-play"></i>
+<!--                        &#9654;-->
                     </button>
                 </div>
                 <div class="btn-group">
@@ -49,33 +54,6 @@
             </div>
         </div>
     </div>
-    <!--    <div class="row mt-5">-->
-    <!--        <div class="col-md-6" id="bubble">-->
-    <!--            &lt;!&ndash;            <button class="btn btn-primary">Replay</button>&ndash;&gt;-->
-    <!--            <div>-->
-    <!--                <svg></svg>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--&lt;!&ndash;        <div class="col-md-6" id="growth-factor">&ndash;&gt;-->
-    <!--        <div class="col-md-6" id="chloropleth">-->
-    <!--            &lt;!&ndash;            <button class="btn btn-primary">Replay</button>&ndash;&gt;-->
-    <!--            <div>-->
-    <!--                <svg></svg>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
-    <!--    <div class="row">-->
-    <!--        <div class="col-md-6" id="peak">-->
-    <!--            <div>-->
-    <!--                <svg></svg>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--        <div class="col-md-6" id="total">-->
-    <!--            <div>-->
-    <!--                <svg></svg>-->
-    <!--            </div>-->
-    <!--        </div>-->
-    <!--    </div>-->
 </div>
 <script src="legend.js"></script>
 <script src="index.js"></script>

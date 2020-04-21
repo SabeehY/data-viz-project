@@ -1,0 +1,8 @@
+** The main file is index.html **
+
+- Please use a webserver (eg. chrome extension) to load index.html to properly load the files
+- Alternatively visit https://data-viz-project.netlify.app/ which runs the file on a server
+
+Data:
+- Data is fetched from github and processes in geo_tagged.R
+- Output geo_cleaned and lookup.csv

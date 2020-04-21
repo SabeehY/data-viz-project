@@ -2,6 +2,7 @@ library(tidyverse)
 library(dplyr)
 library(lubridate)
 
+# Loads latest time-series data from JHU github repo
 data <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_confirmed_US.csv")
 deathData <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_US.csv")
 lookup <- read.csv("https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/UID_ISO_FIPS_LookUp_Table.csv")
@@ -64,10 +65,8 @@ df <- formatGrowthFactors(df, "death_gf")
 #df <- filter(df, date > "2020-03-01")
 
 df <- arrange(df, date)
-totals <- group_by(df, date) %>% summarize(case=sum(case), death=sum(death), case_cum=cumsum(case), death_cum=cumsum(death))
 
-write_csv(lookup, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/lookup.csv')
-write_csv(df, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/geo_cleaned.csv')
-write_csv(totals, '~/Documents/UCF/Study/Semester 2/CAP 6737 - Data Visualization/Group Project.tmp/totals.csv')
+write_csv(lookup, 'lookup.csv')
+write_csv(df, 'geo_cleaned.csv')
 
 #View(df)
