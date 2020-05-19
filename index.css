@@ -19,7 +19,7 @@
     justify-content: center;
 }
 
-.action-bar > input[type=range] {
+#date {
     cursor: pointer;
 }
 
@@ -27,4 +27,17 @@
     font-size: 30px;
     font-weight: bold;
     fill: rgba(0, 0, 0, 0.5);
+}
+
+.loader {
+    font-size: 20px;
+    background: #e5e5e5;
+    min-height: 300px;
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+.loader > div {
+    margin-top: auto;
+    margin-bottom: auto;
 }
