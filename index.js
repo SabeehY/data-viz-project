@@ -376,6 +376,7 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     var [chartType] = chartSelector();
     if (chartType === bubbleMetric) {
       showBubbles(svg, data);
+      // showPeaks(svg, data);
     } else if (chartType === growthMetric) {
       showChloro(svg, data);
     } else if (chartType === peakMetric) {
@@ -391,7 +392,6 @@ d3.csv('./geo_cleaned.csv', parseData).then(dataset => {
     if (!dates[i]) return timer.stop();
     const date = dates[i];
     dateRange.value = timeScale(new Date(date));
-    console.log('timer iteratoin for date', date);
     updateMap(date);
     i++;
   }

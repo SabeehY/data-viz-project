@@ -62,7 +62,7 @@ df <- formatGrowthFactors(df, "case_gf")
 df <- formatGrowthFactors(df, "death_gf")
 
 ### After March
-#df <- filter(df, date > "2020-03-01")
+df <- filter(df, date > "2020-03-01")
 
 df <- arrange(df, date)
 
