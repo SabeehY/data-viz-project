@@ -74,13 +74,6 @@ if (ROOT == "") {
   ROOT <- getwd()
 }
 
-print("GITHUB_WORKSPACE env var:")
-print(Sys.getenv("GITHUB_WORKSPACE"))
-print("ROOT value:")
-print(ROOT)
-print("write path")
-print(file.path(ROOT, 'data/lookup.csv'))
-
 ## Presist data
 write.csv(lookup, file.path(ROOT, 'data/lookup.csv'))
 write.csv(df, file.path(ROOT, 'data/geo_cleaned.csv'))
