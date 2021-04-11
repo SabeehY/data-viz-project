@@ -70,5 +70,5 @@ df <- filter(df, date > "2020-03-01")
 df <- arrange(df, date)
 
 ## Presist data
-write_csv(lookup, 'lookup.csv')
-write_csv(df, 'geo_cleaned.csv')
+write_csv(lookup, 'data/lookup.csv')
+write_csv(df, 'data/geo_cleaned.csv')

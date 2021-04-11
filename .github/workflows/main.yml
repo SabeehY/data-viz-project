@@ -59,5 +59,13 @@ jobs:
   
       - name: Generate data
         run: |
-          source("R/data_prep.R")
+          source("R/data_prep.R", echo=TRUE)
         shell: Rscript {0}
+
+      - name: Commit files
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add --all
+          git commit -am "update data"
+          git push 
