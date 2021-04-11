@@ -32,7 +32,14 @@ jobs:
     # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2a
+      - uses: actions/checkout@v2
+      
+      - uses: r-lib/actions/setup-r@master
+        with:
+          r-version: ${{ matrix.config.r }}
+          http-user-agent: ${{ matrix.config.http-user-agent }} 
+          
+      - name: Setup renv
         run: |
           install.packages('remotes')
           remotes::install_github("rstudio/renv")
