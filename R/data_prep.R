@@ -69,6 +69,18 @@ df <- formatGrowthFactors(df, "death_gf")
 df <- filter(df, date > "2020-03-01")
 df <- arrange(df, date)
 
+ROOT <- Sys.getenv("GITHUB_WORKSPACE")
+if (ROOT == "") {
+  ROOT <- getwd()
+}
+
+print("GITHUB_WORKSPACE env var:")
+print(Sys.getenv("GITHUB_WORKSPACE"))
+print("ROOT value:")
+print(ROOT)
+print("write path")
+print(file.path(ROOT, 'data/lookup.csv'))
+
 ## Presist data
-write_csv(lookup, 'data/lookup.csv')
-write_csv(df, 'data/geo_cleaned.csv')
+write.csv(lookup, file.path(ROOT, 'data/lookup.csv'))
+write.csv(df, file.path(ROOT, 'data/geo_cleaned.csv'))
