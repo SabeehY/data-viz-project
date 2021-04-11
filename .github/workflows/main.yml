@@ -67,5 +67,5 @@ jobs:
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           git add .
-          git commit -am "update data"
+          git diff-index --quiet HEAD || git commit -m "update data"
           git push
