@@ -59,9 +59,11 @@ jobs:
   
       - name: Generate data
         run: |
-          source("R/data_prep.R", echo=TRUE)
+          source("R/data_prep.R", echo=TRUE, verbose=TRUE)
         shell: Rscript {0}
       
+      - run: echo $GITHUB_WORKSPACE
+
       - name: List files
         run: |
           ls -l
